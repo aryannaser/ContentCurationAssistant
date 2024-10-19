@@ -24,7 +24,7 @@ namespace ContentSummarizerService
                 return "Input content is empty.";
             }
 
-            string apiKey = Environment.GetEnvironmentVariable("OpenAIKey");
+            string apiKey = Environment.GetEnvironmentVariable("OpenAiKey");
 
             if (string.IsNullOrEmpty(apiKey))
             {
