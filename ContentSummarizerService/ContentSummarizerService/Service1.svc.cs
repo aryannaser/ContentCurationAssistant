@@ -5,6 +5,10 @@ using System.Runtime.Serialization;
 using System.ServiceModel;
 using System.ServiceModel.Web;
 using System.Text;
+using System.Web.ModelBinding;
+using System.Xml.Linq;
+
+using OpenAI.Chat;
 
 namespace ContentSummarizerService
 {
@@ -14,7 +18,50 @@ namespace ContentSummarizerService
     {
         public string SummarizeText(string content)
         {
-            
+            // Placeholder logic: return the first 100 characters followed by an ellipsis
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return "Input content is empty.";
+            }
+
+            string apiKey = Environment.GetEnvironmentVariable("OpenAIKey");
+
+            if (string.IsNullOrEmpty(apiKey))
+            {
+                return "API key is missing or not properly set.";
+            }
+            try
+            {
+                ChatClient client = new ChatClient("gpt-4o-mini", apiKey);
+
+                List<ChatMessage> messages = new List<ChatMessage>
+                {
+                    new UserChatMessage("Please summarize the following text:"),
+                    new SystemChatMessage(content)
+                };
+
+                ChatCompletion completion = client.CompleteChat(messages);
+
+                messages.Add(new AssistantChatMessage(completion));
+
+                // Extract the assistant's response (summary)
+                var assistantMessage = messages.OfType<AssistantChatMessage>().LastOrDefault();
+                if (assistantMessage != null && assistantMessage.Content.Count > 0)
+                {
+                    // Return the summarized text, cleaned of unnecessary spaces and line breaks
+                    string summary = assistantMessage.Content[0].Text;
+
+                    // Normalize whitespace, remove line breaks, and return a single paragraph
+                    return summary.Replace("\r\n", " ").Replace("\n", " ").Replace("\r", " ").Trim();
+                }
+
+                return "Failed to generate a summary.";
+
+            }
+            catch (Exception ex)
+            {
+                return $"An error occurred: {ex.Message}";
+            }
         }
     }
 }
