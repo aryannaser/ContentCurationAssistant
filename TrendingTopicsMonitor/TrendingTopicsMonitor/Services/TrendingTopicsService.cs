@@ -5,6 +5,9 @@ using System.Text.Json;
 using System;
 using System.Threading;
 using System.Text.Json.Serialization;
+using static TrendingTopicsMonitor.Services.TrendingTopicsService;
+using OpenAI.Chat;
+using Microsoft.AspNetCore.DataProtection.KeyManagement;
 
 namespace TrendingTopicsMonitor.Services
 {
@@ -13,22 +16,17 @@ namespace TrendingTopicsMonitor.Services
         private readonly HttpClient _httpClient;
         private readonly string newsApiKey;
         private readonly string serpApiKey;
-        private readonly string xApiKey;
-        private readonly string xApiKeySecret;
-        private readonly string xApiBearerToken;
+        // private readonly string gptApiKey;
 
         public TrendingTopicsService(HttpClient httpClient)
         {
             _httpClient = httpClient;
             newsApiKey = Environment.GetEnvironmentVariable("NewsAPIKey");
             serpApiKey = Environment.GetEnvironmentVariable("SerpAPI");
-            xApiKey = Environment.GetEnvironmentVariable("XAPIKey");
-            xApiKeySecret = Environment.GetEnvironmentVariable("XAPIKeySecret");
-            xApiBearerToken = Environment.GetEnvironmentVariable("BearerToken");
+            //gptApiKey = Environment.GetEnvironmentVariable("OpenAiKey");
 
             Console.WriteLine($"NewsAPI Key: {newsApiKey}");
             Console.WriteLine($"SerpAPI Key: {serpApiKey}");
-            Console.WriteLine($"XAPI BearerToken: {xApiBearerToken}");
         }
 
         // Method to fetch trending news from NewsAPI
@@ -115,6 +113,61 @@ namespace TrendingTopicsMonitor.Services
             return trendingTopics;
         }
 
+        //public async Task<List<CombinedTrendingTopic>> GetCombinedTrendingTopics()
+        //{
+        //    // Fetch from both APIs
+        //    var serp = await GetTrendingTopicsFromSerpAPI();
+        //    var news = await GetTrendingNews();
+
+        //    var combinedTopics = new List<CombinedTrendingTopic>();
+        //    // SerpAPI topics to CombinedTrendingTopic
+        //    combinedTopics.AddRange(serp.Select(topic => new CombinedTrendingTopic
+        //    {
+        //        Title = topic.Title,
+        //        Link = topic.Link,
+        //        Source = "SerpAPI"
+        //    }));
+
+        //    // NewsAPI articles to CombinedTrendingTopic
+        //    combinedTopics.AddRange(news.Select(article => new CombinedTrendingTopic
+        //    {
+        //        Title = article.Title,
+        //        Link = article.Url,
+        //        Source = "NewsAPI"
+        //    }));
+
+        //    return await RankTrendingTopicsWithGPT(combinedTopics);
+        //}
+
+        //private async Task<List<string>> RankTrendingTopicsWithGPT(List<CombinedTrendingTopic> topics)
+        //{
+        //    var prompt = "Please rank the following topics in terms of popularity and relevance:\n";
+        //    foreach (var topic in topics)
+        //    {
+        //        prompt += $"- {topic.Title} ({topic.Source}), Link: {topic.Link}\n";
+        //    }
+
+        //    prompt += "\nProvide a ranked list of the top 15.";
+
+        //    try
+        //    {
+        //        ChatClient client = new ChatClient("gpt-4o-mini", gptApiKey);
+
+        //        List<ChatMessage> messages = new List<ChatMessage>
+        //        {
+        //            new UserChatMessage(prompt)
+        //        };
+
+        //        ChatCompletion completion = await client.CompleteChatAsync(messages);
+
+        //        var assistantMessage = messages.OfType<AssistantChatMessage>().LastOrDefault();
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return $"Error: {ex.Message}";
+        //    }
+        //}
+
         // Model to represent the NewsAPI response
         private class NewsApiResponse
         {
@@ -177,5 +230,12 @@ namespace TrendingTopicsMonitor.Services
             public string Value { get; set; }
             public string Link { get; set; }
         }
+
+        //public class CombinedTrendingTopic
+        //{
+        //    public string Title { get; set; }
+        //    public string Link { get; set; }
+        //    public string Source { get; set; }
+        //}
     }
 }

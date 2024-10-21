@@ -44,19 +44,5 @@ namespace TrendingTopicsMonitor.Controllers
 
             return Ok(trendingTopics);
         }
-
-        // Endpoint to get data from XAPI
-        [HttpGet("xapi-data")]
-        public async Task<IActionResult> GetDataFromXAPI()
-        {
-            var xApiData = await _trendingTopicsService.GetTrendingTopicsFromXAPI();
-
-            if (xApiData == null || xApiData.Count == 0)
-            {
-                return NotFound("No data from XAPI available.");
-            }
-
-            return Ok(xApiData);
-        }
     }
 }
